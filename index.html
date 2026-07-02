@@ -539,7 +539,7 @@
     const TYPES = ["咖啡", "餐厅", "景点", "酒店", "购物", "其他"];
     const TYPE_KEYWORDS = [
       ["咖啡", ["咖啡", "cafe", "café", "coffee", "拿铁", "烘焙", "甜品", "蛋糕"]],
-      ["餐厅", ["餐厅", "饭店", "食堂", "早餐", "朝ごはん", "橙汁", "果汁", "brunch", "bistro", "restaurant", "diner", "料理", "午餐", "晚餐", "面包店", "酒吧", "bar"]],
+      ["餐厅", ["餐厅", "饭店", "食堂", "早餐", "朝ごはん", "橙汁", "果汁", "brunch", "bistro", "bistrò", "restaurant", "diner", "osteria", "pizzeria", "trattoria", "pizza", "grill", "料理", "午餐", "晚餐", "面包店", "酒吧", "bar"]],
       ["酒店", ["酒店", "hotel", "民宿", "住宿", "旅馆", "resort"]],
       ["购物", ["购物", "商场", "百货", "买手店", "古着", "书店", "市集", "market", "boutique", "shop"]],
       ["景点", ["景点", "博物馆", "美术馆", "小巷", "石阶", "公园", "花园", "教堂", "神社", "寺", "宫", "塔", "广场", "museum", "garden"]]
@@ -594,9 +594,37 @@
     }
 
     function isSectionHeader(line) {
-      const text = line.trim().replace(/[：:]\s*$/, "");
+      const text = cleanPoiName(line).replace(/[：:]\s*$/, "");
       if (text.length > 28) return false;
-      return /(清单|小店|景点|美食|咖啡|餐厅|酒店|购物|路线|打卡|推荐|收藏|list)$/i.test(text);
+      return /(清单|小店|景点|美食|咖啡|餐厅|酒店|购物|路线|打卡|推荐|收藏|附录|list)$/i.test(text);
+    }
+
+    function parseCaptionPoi(line) {
+      const text = line.trim();
+      const match = text.match(/^图[一二三四五六七八九十\d]+(?:图[一二三四五六七八九十\d]+)*(?:[-—~至到和、图一二三四五六七八九十\d]*)?[：:]\s*(.+)$/);
+      if (!match) return null;
+
+      const content = match[1].trim();
+      const mixedAreaMatch = content.match(/^([A-ZÀ-Þ][A-Za-zÀ-ÿ'’.\-\s]{2,28})\s+([\u3400-\u9fff]{2,8})\s+(.{2,80})$/);
+      if (mixedAreaMatch) {
+        return {
+          title: cleanPoiName(mixedAreaMatch[3]),
+          area: `${mixedAreaMatch[2].trim()} / ${mixedAreaMatch[1].trim()}`
+        };
+      }
+
+      const areaMatch = content.match(/^([\u3400-\u9fff]{2,8}|[A-ZÀ-Þ][A-Za-zÀ-ÿ'’.\-\s]{2,28})\s+(.{2,80})$/);
+      if (areaMatch) {
+        return {
+          title: cleanPoiName(areaMatch[2]),
+          area: areaMatch[1].trim()
+        };
+      }
+
+      return {
+        title: cleanPoiName(content),
+        area: ""
+      };
     }
 
     function looksLikeSentence(line) {
@@ -707,7 +735,11 @@
           continue;
         }
 
-        if (isPoiTitle(trimmed) || isShortPoiCandidate(trimmed, nextLine, inListSection, startsBlock)) {
+        const captionPoi = parseCaptionPoi(trimmed);
+        if (captionPoi && captionPoi.title) {
+          if (current) groups.push(current);
+          current = { title: captionPoi.title, area: captionPoi.area, lines: [] };
+        } else if (isPoiTitle(trimmed) || isShortPoiCandidate(trimmed, nextLine, inListSection, startsBlock)) {
           if (current) groups.push(current);
           current = { title: cleanPoiName(trimmed), lines: [] };
         } else if (current) {
@@ -744,7 +776,7 @@
           return {
             id: uid(),
             name: group.title,
-            area: detectArea(description, city.trim()),
+            area: group.area ? (city.trim() ? `${group.area} / ${city.trim()}` : group.area) : detectArea(description, city.trim()),
             type,
             reason: summarizeReason(group.title, type, description),
             clue: extractClue(description)
