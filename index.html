@@ -16,8 +16,11 @@
       --soft-2: #faf8f4;
       --accent: #315f52;
       --accent-soft: #e7f0eb;
+      --warm: #d8a84f;
+      --warm-soft: #fbf3df;
       --danger: #a13b32;
-      --shadow: 0 18px 50px rgba(64, 50, 34, 0.08);
+      --shadow: 0 22px 60px rgba(63, 52, 39, 0.10);
+      --shadow-soft: 0 12px 34px rgba(63, 52, 39, 0.07);
       --radius-lg: 24px;
       --radius-md: 18px;
       --radius-sm: 12px;
@@ -31,7 +34,8 @@
       margin: 0;
       min-height: 100vh;
       background:
-        linear-gradient(180deg, rgba(224, 247, 250, 0.55) 0, rgba(247, 244, 239, 0) 92px),
+        radial-gradient(circle at 18% 0%, rgba(216, 168, 79, 0.12), transparent 30%),
+        linear-gradient(180deg, rgba(245, 239, 226, 0.86) 0, rgba(247, 244, 239, 0) 180px),
         var(--bg);
       color: var(--ink);
       font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -356,6 +360,283 @@
       font-weight: 780;
     }
 
+    @media (min-width: 981px) {
+      .app {
+        width: min(1240px, calc(100vw - 64px));
+        padding: 48px 0 56px;
+      }
+
+      .hero {
+        margin-bottom: 28px;
+      }
+
+      h1 {
+        font-size: clamp(46px, 4.8vw, 68px);
+        font-weight: 760;
+      }
+
+      .subtitle {
+        max-width: 620px;
+        color: #4a4339;
+        font-size: 19px;
+        font-weight: 540;
+      }
+
+      .workspace {
+        grid-template-columns: minmax(360px, 0.82fr) minmax(540px, 1.18fr);
+        gap: 24px;
+        align-items: start;
+      }
+
+      .panel,
+      .result-panel {
+        border-radius: 30px;
+      }
+
+      .input-panel {
+        padding: 30px;
+        background: rgba(255, 255, 255, 0.84);
+        border-color: rgba(224, 216, 204, 0.86);
+        box-shadow: var(--shadow);
+      }
+
+      .field-head {
+        margin-bottom: 22px;
+      }
+
+      .field-head label {
+        font-size: 25px;
+        letter-spacing: 0;
+      }
+
+      label {
+        color: #7c7569;
+        font-size: 12px;
+        letter-spacing: 0.02em;
+      }
+
+      textarea,
+      input,
+      select {
+        border-color: rgba(222, 213, 199, 0.9);
+        border-radius: 16px;
+        background: rgba(250, 248, 244, 0.92);
+      }
+
+      textarea {
+        min-height: 455px;
+        padding: 20px;
+        color: #282624;
+        font-size: 15px;
+        line-height: 1.72;
+      }
+
+      input,
+      select {
+        min-height: 48px;
+        padding: 12px 14px;
+      }
+
+      .city-row {
+        margin-bottom: 18px;
+      }
+
+      .actions {
+        gap: 11px;
+        margin-top: 18px;
+      }
+
+      .btn {
+        min-height: 46px;
+        border-radius: 16px;
+      }
+
+      .actions .btn.primary {
+        min-height: 52px;
+        background: #315f52;
+        box-shadow: 0 16px 28px rgba(49, 95, 82, 0.18);
+      }
+
+      .btn.light {
+        background: #fff;
+      }
+
+      .result-panel {
+        padding: 26px;
+        background: rgba(255, 255, 255, 0.88);
+        border: 1px solid rgba(224, 216, 204, 0.86);
+        box-shadow: var(--shadow);
+      }
+
+      .result-toolbar {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 18px;
+        margin-bottom: 22px;
+        padding: 0 2px 22px;
+        border-bottom: 1px solid rgba(231, 224, 215, 0.9);
+      }
+
+      .result-title {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+      }
+
+      .result-heading {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        color: #254d43;
+        font-size: 30px;
+        font-weight: 760;
+      }
+
+      .count {
+        min-width: 32px;
+        height: 28px;
+        padding: 0 11px;
+        background: var(--warm-soft);
+        color: #7d5b1d;
+        font-size: 14px;
+      }
+
+      .toolbar-actions {
+        justify-content: flex-start;
+        gap: 10px;
+      }
+
+      .tool-btn {
+        flex-direction: row;
+        min-width: 0;
+        min-height: 38px;
+        padding: 8px 12px;
+        border: 1px solid rgba(231, 224, 215, 0.92);
+        border-radius: 999px;
+        background: rgba(250, 248, 244, 0.72);
+        color: #5d625c;
+        font-size: 12px;
+        font-weight: 690;
+      }
+
+      .tool-btn:hover {
+        background: #fff;
+        box-shadow: var(--shadow-soft);
+      }
+
+      .tool-icon {
+        color: #66706a;
+        font-size: 15px;
+      }
+
+      .places-list {
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+      }
+
+      #poiBody {
+        gap: 16px;
+      }
+
+      .place-card {
+        grid-template-columns: minmax(0, 1fr) 150px;
+        gap: 22px;
+        padding: 22px;
+        border: 1px solid rgba(231, 224, 215, 0.88);
+        border-radius: 22px;
+        background: linear-gradient(180deg, #fff 0%, #fffdf9 100%);
+        box-shadow: var(--shadow-soft);
+      }
+
+      .place-card:first-child,
+      .place-card:last-child {
+        padding-top: 22px;
+        padding-bottom: 22px;
+      }
+
+      .place-main {
+        gap: 12px;
+      }
+
+      .place-head {
+        align-items: start;
+        gap: 14px;
+      }
+
+      .place-name input {
+        min-height: 34px;
+        color: #202020;
+        font-size: 25px;
+        line-height: 1.15;
+        font-weight: 760;
+      }
+
+      .place-card select {
+        min-width: 92px;
+        min-height: 34px;
+        padding: 6px 30px 6px 14px;
+        background: #f7f0e4;
+        color: #4d4a43;
+        font-size: 13px;
+      }
+
+      .place-meta {
+        color: #70695f;
+        font-size: 14px;
+      }
+
+      .place-area input {
+        color: #70695f;
+        font-size: 14px;
+      }
+
+      .place-card textarea {
+        min-height: 74px;
+        padding: 4px 0 0;
+        color: #363330;
+        font-size: 15px;
+        line-height: 1.72;
+      }
+
+      .place-card input:focus,
+      .place-card select:focus,
+      .place-card textarea:focus {
+        background: rgba(250, 248, 244, 0.92);
+      }
+
+      .place-actions {
+        gap: 9px;
+        align-self: stretch;
+        align-content: center;
+      }
+
+      .map-link {
+        min-height: 46px;
+        padding: 10px 13px;
+        border-radius: 16px;
+        font-size: 14px;
+        box-shadow: none;
+      }
+
+      .place-copy,
+      .place-delete {
+        min-height: 42px;
+        border-radius: 14px;
+        background: #fff;
+        box-shadow: none;
+      }
+
+      .empty {
+        border-radius: 22px;
+        background: rgba(250, 248, 244, 0.78);
+      }
+    }
+
     .places-list,
     #poiBody {
       display: grid;
@@ -645,6 +926,76 @@
 
     .hidden {
       display: none;
+    }
+
+    @media (min-width: 981px) {
+      .result-panel {
+        padding: 26px;
+        background: rgba(255, 255, 255, 0.88);
+        border: 1px solid rgba(224, 216, 204, 0.86);
+        box-shadow: var(--shadow);
+      }
+
+      .result-toolbar {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 18px;
+        margin-bottom: 22px;
+        padding: 0 2px 22px;
+        border-bottom: 1px solid rgba(231, 224, 215, 0.9);
+      }
+
+      .toolbar-actions {
+        justify-content: flex-start;
+      }
+
+      .places-list {
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+      }
+
+      #poiBody {
+        gap: 16px;
+      }
+
+      .place-card {
+        grid-template-columns: minmax(0, 1fr) 150px;
+        gap: 22px;
+        padding: 22px;
+        border: 1px solid rgba(231, 224, 215, 0.88);
+        border-radius: 22px;
+        background: linear-gradient(180deg, #fff 0%, #fffdf9 100%);
+        box-shadow: var(--shadow-soft);
+      }
+
+      .place-card:first-child,
+      .place-card:last-child {
+        padding-top: 22px;
+        padding-bottom: 22px;
+      }
+
+      .place-name input {
+        min-height: 34px;
+        font-size: 25px;
+        line-height: 1.15;
+        font-weight: 760;
+      }
+
+      .place-actions {
+        gap: 9px;
+        align-self: stretch;
+        align-content: center;
+      }
+
+      .map-link {
+        min-height: 46px;
+        border-radius: 16px;
+        font-size: 14px;
+        box-shadow: none;
+      }
     }
 
     @media (max-width: 980px) {
@@ -964,14 +1315,13 @@
       <div class="panel result-panel">
         <div class="result-toolbar">
           <div class="result-title">
-            <h2 class="result-heading" id="resultHeading">📍 地点清单</h2>
+            <h2 class="result-heading" id="resultHeading">地点清单 <span class="count" id="poiCount">0</span></h2>
           </div>
           <div class="toolbar-actions">
             <button class="tool-btn" id="csvBtn" type="button"><span class="tool-icon">⇩</span><span>导出 CSV</span></button>
             <button class="tool-btn" id="copyLinksBtn" type="button"><span class="tool-icon">⧉</span><span>复制全部</span></button>
             <button class="tool-btn" id="openAllBtn" type="button"><span class="tool-icon">↗</span><span>打开全部</span></button>
             <button class="tool-btn" id="addBtn" type="button"><span class="tool-icon">＋</span><span>新增地点</span></button>
-            <span class="count" id="poiCount">0</span>
           </div>
         </div>
 
@@ -1160,7 +1510,7 @@
       const text = String(title || "").trim();
       if (!text) return false;
       if (/^[A-ZÀ-Þ][A-Za-zÀ-ÿ0-9'’&.\-\s]{2,42}$/.test(text) && text.split(/\s+/).length <= 6) return true;
-      return /(?:咖啡|珈琲|餐厅|飯店|饭店|小馆|房|面包店|书店|商店|市場|市场|美术馆|博物馆|神社|大社|日沉宫|寺|城|峡|島|岛|松岛|公园|花园|广场|喷泉|阶梯|要塞|灯塔|温泉|温泉街|站|车站|总站|停车场|案内所|alley|Alley|Gate|Point|Fountain|Stairs|Gelato|Bakery|Cafe|Café|Coffee|bread|stories|Store|Market)$/i.test(text);
+      return /(?:咖啡|珈琲|餐厅|飯店|饭店|小馆|房|面包店|书店|商店|集合店|市場|市场|集市|美术馆|博物馆|神社|大社|日沉宫|寺|城|峡|島|岛|松岛|公园|公園|花园|广场|喷泉|阶梯|要塞|灯塔|高原|通|温泉|温泉街|站|车站|总站|停车场|案内所|alley|Alley|Gate|Point|Fountain|Stairs|Gelato|Bakery|Cafe|Café|Coffee|COUNTRY|FACE|bread|stories|Store|Market)$/i.test(text);
     }
 
     function scorePoiCandidate(title, line, nextLine = "", startsBlock = true) {
@@ -1321,10 +1671,10 @@
       let text = (/^\d{2,}\s+[A-ZÀ-Þ]/.test(rawTitle) ? rawTitle : cleanPoiName(rawTitle))
         .replace(/^图[一二三四五六七八九十\d]+(?:[-—~至到和、]\s*[一二三四五六七八九十\d]+)?\s*/i, "")
         .replace(/^图[一二三四五六七八九十\d]+的\s*/i, "")
-        .replace(/^Day\s*\d+\s+.*?(?=[\u3400-\u9fffA-Za-zÀ-ÿ0-9'’&.\-\s]{2,24}(?:咖啡|餐厅|面包店|书店|商店|美术馆|博物馆|神社|寺|城|峡|島|岛|公园|花园|广场|喷泉|阶梯|要塞|灯塔|温泉|温泉街|站|alley|Alley|Gate|Point|Fountain|Stairs|Gelato|Bakery|Cafe|Café|Coffee|bread|stories|Store|Market)$)/i, "")
+        .replace(/^Day\s*\d+\s+.*?(?=[\u3400-\u9fffA-Za-zÀ-ÿ0-9'’&.\-\s]{2,24}(?:咖啡|餐厅|面包店|书店|商店|集合店|美术馆|博物馆|神社|寺|城|峡|島|岛|公园|公園|花园|广场|喷泉|阶梯|要塞|灯塔|高原|通|集市|温泉|温泉街|站|alley|Alley|Gate|Point|Fountain|Stairs|Gelato|Bakery|Cafe|Café|Coffee|COUNTRY|FACE|bread|stories|Store|Market)$)/i, "")
         .replace(/^(?:沉浸式体验|懒人友好的|小众艺术区散步)/, "")
         .replace(/^吃了([\u3400-\u9fffA-Za-zÀ-ÿ0-9'’&.\-\s]{2,16})的.+$/, "$1")
-        .replace(/^.*(?:到了|到|去往了|去往|会经过|经过|上|回去|走去|再走去|来到|往|吃了)(?:图[一二三四五六七八九十\d]+的)?(?=[\u3400-\u9fffA-Za-zÀ-ÿ0-9'’&.\-\s]{2,32}(?:咖啡|餐厅|面包店|书店|商店|美术馆|博物馆|神社|大社|日沉宫|寺|城|峡|島|岛|松岛|公园|花园|广场|喷泉|阶梯|要塞|灯塔|温泉|温泉街|站|车站|总站|停车场|案内所|房)$)/, "")
+        .replace(/^.*(?:到了|到|去往了|去往|会经过|经过|上|回去|走去|再走去|来到|往|吃了|走到|巴士去|再或是|可以做巴士去|可以走到)(?:图[一二三四五六七八九十\d]+的)?(?=[\u3400-\u9fffA-Za-zÀ-ÿ0-9'’&.\-\s]{2,32}(?:咖啡|餐厅|面包店|书店|商店|集合店|美术馆|博物馆|神社|大社|日沉宫|寺|城|峡|島|岛|松岛|公园|公園|花园|广场|喷泉|阶梯|要塞|灯塔|高原|通|集市|温泉|温泉街|站|车站|总站|停车场|案内所|房)$)/, "")
         .replace(/^.*(?:顺路逛个|逛个|打卡|直奔|比较热门的|分)(?=[\u3400-\u9fffA-Za-zÀ-ÿ0-9'’&.\-\s]{2,32}(?:咖啡|餐厅|面包店|书店|商店|美术馆|博物馆|神社|寺|城|峡|岛|公园|花园|广场|喷泉|阶梯|要塞|温泉|温泉街|alley|Alley|Gate|Point|Fountain|Stairs|Gelato|Bakery|Cafe|Café|Coffee|bread|stories|Store|Market)$)/, "")
         .replace(/^.*?(?=[A-ZÀ-Þ][A-Za-zÀ-ÿ0-9'’&.\-\s]{2,42}(?:Gate|Point|Fountain|Stairs|Gelato|Bakery|Cafe|Café|Coffee|stories|bread|Alley|Store|Market)$)/, "")
         .replace(/^(?:上午|中午|下午|晚上|早上|傍晚|夜晚)\s*[（(]?\s*/, "")
@@ -1401,17 +1751,32 @@
 
         match = line.match(/^✔️?\s*([A-Za-zÀ-Þ][A-Za-zÀ-ÿ0-9'’&.\-\s]{2,42})\s*[：:，,]/);
         if (match) add(match[1], line);
+
+        match = line.match(/^(?:酒店选的是|住宿选的是|住在)\s*([A-Za-zÀ-Þ\u3400-\u9fff][A-Za-zÀ-ÿ0-9'’&.\-\s\u3400-\u9fff]{2,28})/i);
+        if (match) add(match[1], line);
+
+        match = line.match(/^(?:旁边|附近)\s+([A-Z0-9&][A-Za-z0-9&'’.\-\s]{2,42})\b/);
+        if (match) add(match[1], line);
+
+        match = line.match(/^([A-Z0-9&][A-Za-z0-9&'’.\-\s]{2,42})(?:\s+[\u3400-\u9fff]{2,12}(?:店|集合店))?/);
+        if (match && /(?:店|集合店|COUNTRY|FACE|STORE|MARKET)/i.test(line)) add(match[1], line);
+
+        match = line.match(/^([\u3400-\u9fffA-Za-zÀ-ÿ0-9'’&.\-\s]{2,24}(?:通|集市|高原|公園|公园))\b/);
+        if (match) add(match[1], line);
+
+        match = line.match(/([A-Z][A-Za-z0-9'’&.\-\s]{1,24}集市)/);
+        if (match) add(match[1], line);
       }
 
       const normalized = lines.join(" ");
       const inlinePatterns = [
         /[（(]([^）)]{2,80})[）)]/g,
-        /(?:到了|到|去往了|去往|往|会经过|经过|来到|回到|回去|走去|再走去|坐上去|上|吃了)\s*(?:图[一二三四五六七八九十\d]+的)?([A-ZÀ-Þ][A-Za-zÀ-ÿ0-9'’&.\-\s]{2,42}|[\u3400-\u9fffA-Za-zÀ-ÿ0-9'’&.\-\s]{1,24}(?:咖啡|餐厅|面包店|书店|商店|美术馆|博物馆|神社|大社|日沉宫|寺|城|峡|島|岛|松岛|公园|花园|广场|喷泉|阶梯|要塞|灯塔|温泉|温泉街|站|车站|总站|停车场|案内所|房))\s*(?:的|附近|外|里|上|下车|散步|走|逛|打卡|吃|喝|泡|，|,|。|！|!|；|;|$)/gi,
+        /(?:到了|到|去往了|去往|往|会经过|经过|来到|回到|回去|走去|再走去|坐上去|上|吃了|走到|巴士去|再或是|可以做巴士去|可以走到)\s*(?:图[一二三四五六七八九十\d]+的)?([A-ZÀ-Þ][A-Za-zÀ-ÿ0-9'’&.\-\s]{2,42}|[\u3400-\u9fffA-Za-zÀ-ÿ0-9'’&.\-\s]{1,24}(?:咖啡|餐厅|面包店|书店|商店|集合店|美术馆|博物馆|神社|大社|日沉宫|寺|城|峡|島|岛|松岛|公园|公園|花园|广场|喷泉|阶梯|要塞|灯塔|高原|通|集市|温泉|温泉街|站|车站|总站|停车场|案内所|房))\s*(?:的|附近|外|里|上|下车|散步|走|逛|打卡|吃|喝|泡|，|,|。|！|!|；|;|$)/gi,
         /(?:从|靠近|位于)\s*([A-ZÀ-Þ][A-Za-zÀ-ÿ0-9'’&.\-\s]{2,42}|[\u3400-\u9fffA-Za-zÀ-ÿ0-9'’&.\-\s]{2,24}(?:咖啡|餐厅|面包店|书店|商店|美术馆|博物馆|神社|大社|日沉宫|寺|城|峡|岛|松岛|公园|花园|广场|喷泉|阶梯|要塞|灯塔|温泉|温泉街|车站|总站|停车场|案内所|房))\s*(?:的|进入|出来|出发|散步|逛|打卡|吃|喝|泡|，|,|。|！|!|；|;|$)/gi,
         /往(?!返)\s*([^，,。.!！?？…]{2,48}?)(?:走|就是|，|,|。|！|!|；|;|$)/g,
         /(?:📍\s*)?([A-ZÀ-Þ][A-Za-zÀ-ÿ0-9'’&.\-\s]{2,42}(?:Gate|Point|Fountain|Stairs|Gelato|Bakery|stories|bread|Alley|Store|Market))/g,
         /([\u3400-\u9fffA-Za-zÀ-ÿ0-9'’&.\-\s]{2,24}(?:alley|Alley))/g,
-        /([\u3400-\u9fffA-Za-zÀ-ÿ0-9'’&.\-\s]{1,24}(?:美术馆|博物馆|神社|大社|日沉宫|寺|峡|島|岛|松岛|公园|花园|广场|喷泉|阶梯|要塞|灯塔|温泉|温泉街))/g
+        /([\u3400-\u9fffA-Za-zÀ-ÿ0-9'’&.\-\s]{1,24}(?:美术馆|博物馆|神社|大社|日沉宫|寺|峡|島|岛|松岛|公园|公園|花园|广场|喷泉|阶梯|要塞|灯塔|高原|通|集市|温泉|温泉街))/g
       ];
 
       for (const pattern of inlinePatterns) {
@@ -1650,7 +2015,9 @@
       const lower = text.toLowerCase();
       if (/^(?:渔人码头|联合广场|唐人街|金门大桥|Lover's Point|Las Vegas Strip|Sphere Vista Point|威尼斯人)/i.test(text)) return "景点";
       if (/^(?:JR\s*児島站|瀨戶內海|濑户内海|瀬戸内海)/i.test(text)) return "景点";
-      if (/^[^\s]{2,28}(?:神社|大社|日沉宫|灯塔|松岛|島|岛|车站|JR站|总站|停车场)/.test(text)) return "景点";
+      if (/^[^\s]{2,28}(?:神社|大社|日沉宫|灯塔|松岛|島|岛|车站|JR站|总站|停车场|公园|公園|高原)/.test(text)) return "景点";
+      if (/^(?:A&F COUNTRY|THE NORTH FACE|VINTAGE集市|中町通)/i.test(text)) return "购物";
+      if (/^里士满(?:\s|$)/.test(text)) return "酒店";
       if (/^(?:高千穗峡|草千里|阿苏神社|黑川温泉|熊本城|古城墙和要塞|古城和黑水湾|Pile Gate|Onofrio Fountain|Jesuit Stairs|Fort Lovrijenac|View Point of Dubrovnik|Viewpoint of Dubrovnik|北浜\s*alley)/i.test(text)) return "景点";
       if (/^花房(?:\s|$)/.test(text)) return "餐厅";
       if (/^(?:Peppino’s Gelato|Peppino's Gelato|iam with bread|206 TSU MA MU)/i.test(text)) return "餐厅";
