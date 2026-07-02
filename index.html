@@ -695,22 +695,39 @@
       }
     }
 
-    @media (max-width: 720px) {
+    @media (max-width: 768px) {
       body {
         background: var(--bg);
       }
 
       .app {
         width: 100%;
-        padding: 22px 10px 22px;
+        padding: 14px 12px 24px;
+      }
+
+      .hero {
+        margin-bottom: 12px;
       }
 
       h1 {
-        font-size: 42px;
+        font-size: 35px;
+        line-height: 1;
+      }
+
+      .subtitle {
+        margin-top: 7px;
+        font-size: 15px;
+        line-height: 1.35;
+        font-weight: 560;
+      }
+
+      .status {
+        margin-top: 8px;
+        font-size: 12px;
       }
 
       .panel {
-        border-radius: 20px;
+        border-radius: 18px;
       }
 
       .input-panel,
@@ -720,11 +737,52 @@
 
       textarea {
         min-height: 220px;
+        padding: 14px;
+        font-size: 14px;
+      }
+
+      .field-head {
+        display: block;
+        margin-bottom: 12px;
+      }
+
+      .field-head label {
+        font-size: 21px;
+      }
+
+      .city-row {
+        margin-top: 14px;
+      }
+
+      .city-row .btn {
+        width: 100%;
+        min-height: 48px;
+      }
+
+      .actions {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .actions .btn {
+        min-height: 40px;
+        padding: 9px 10px;
+        font-size: 13px;
+        background: rgba(255, 255, 255, 0.72);
+        color: var(--ink);
+        border: 1px solid var(--line);
+        box-shadow: none;
+      }
+
+      .actions .btn.danger {
+        color: var(--danger);
+        background: #fff7f5;
       }
 
       .result-toolbar {
         gap: 14px;
-        margin-bottom: 10px;
+        margin-bottom: 12px;
       }
 
       .result-title {
@@ -735,27 +793,28 @@
       }
 
       .result-heading {
-        font-size: 28px;
+        font-size: 25px;
       }
 
       .toolbar-actions {
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 6px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
         width: 100%;
       }
 
       .tool-btn {
         min-height: 46px;
-        padding: 6px 4px;
+        padding: 7px 8px;
         border: 1px solid var(--line);
         background: #fff;
-        font-size: 11px;
+        font-size: 12px;
         border-radius: 12px;
+        flex-direction: row;
       }
 
       .tool-icon {
-        font-size: 18px;
+        font-size: 17px;
       }
 
       .count {
@@ -765,10 +824,6 @@
         min-width: 34px;
       }
 
-      .actions {
-        grid-template-columns: 1fr 1fr;
-      }
-
       .btn,
       .btn.icon {
         width: 100%;
@@ -776,22 +831,63 @@
 
       .place-card {
         gap: 14px;
-        padding: 18px 0;
+        padding: 16px;
+        margin: 10px 0;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: #fff;
+        box-shadow: 0 10px 24px rgba(64, 50, 34, 0.05);
+      }
+
+      .place-card:first-child {
+        padding-top: 16px;
+      }
+
+      .place-card:last-child {
+        padding-bottom: 16px;
+      }
+
+      .place-main {
+        gap: 8px;
       }
 
       .place-head {
-        align-items: start;
+        align-items: center;
         gap: 8px;
       }
 
       .place-name input {
-        font-size: 22px;
+        min-height: 24px;
+        font-size: 21px;
+        line-height: 1.2;
+      }
+
+      .place-card input,
+      .place-card select,
+      .place-card textarea {
+        border-color: transparent;
+        background: transparent;
+        box-shadow: none;
+      }
+
+      .place-card select {
+        max-width: 104px;
+        min-height: 28px;
+        padding: 3px 9px;
+        background: #f6f0e7;
+        font-size: 12px;
       }
 
       .place-meta,
       .place-area input,
       .place-card textarea {
         font-size: 15px;
+      }
+
+      .place-card textarea {
+        min-height: 54px;
+        line-height: 1.58;
+        resize: vertical;
       }
 
       .place-actions {
@@ -803,21 +899,21 @@
 
       .map-link {
         grid-column: 1 / -1;
-        min-height: 54px;
-        padding: 10px 14px;
+        min-height: 52px;
+        padding: 11px 14px;
         flex-direction: row;
         gap: 8px;
         font-size: 16px;
+        border-radius: 14px;
       }
 
       .place-copy,
       .place-delete {
-        min-height: 44px;
-        font-size: 19px;
-      }
-
-      .field-head {
-        display: block;
+        min-height: 38px;
+        padding: 7px;
+        font-size: 17px;
+        background: transparent;
+        box-shadow: none;
       }
 
     }
@@ -1593,7 +1689,7 @@
             <textarea data-field="reason" aria-label="推荐理由">${escapeHtml(poi.reason)}</textarea>
           </div>
           <div class="place-actions">
-            <a class="btn map-link" href="${mapUrl(poi)}" target="_blank" rel="noopener"><span aria-hidden="true">📍</span><span>Google Maps</span></a>
+            <a class="btn map-link" href="${mapUrl(poi)}" target="_blank" rel="noopener"><span aria-hidden="true">📍</span><span>Open in Google Maps</span></a>
             <button class="btn light place-copy" type="button" title="复制" aria-label="复制">⧉</button>
             <button class="btn danger place-delete" type="button" title="删除" aria-label="删除">✕</button>
           </div>
