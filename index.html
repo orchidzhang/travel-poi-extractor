@@ -293,19 +293,15 @@
     }
 
     .col-reason {
-      width: 21%;
-    }
-
-    .col-clue {
-      width: 21%;
+      width: 34%;
     }
 
     .col-link {
-      width: 12%;
+      width: 14%;
     }
 
     .col-row-actions {
-      width: 7%;
+      width: 8%;
     }
 
     .map-link {
@@ -521,7 +517,6 @@
                 <th class="col-area">城市/区域</th>
                 <th class="col-type">类型</th>
                 <th class="col-reason">推荐理由</th>
-                <th class="col-clue">原文线索</th>
                 <th class="col-link">Google Maps 链接</th>
                 <th class="col-row-actions">操作</th>
               </tr>
@@ -538,8 +533,8 @@
     const STORAGE_KEY = "travel-poi-extractor-v1";
     const TYPES = ["咖啡", "餐厅", "景点", "酒店", "购物", "其他"];
     const TYPE_KEYWORDS = [
-      ["咖啡", ["咖啡", "cafe", "café", "coffee", "拿铁", "烘焙", "甜品", "蛋糕"]],
-      ["餐厅", ["餐厅", "饭店", "食堂", "早餐", "朝ごはん", "橙汁", "果汁", "brunch", "bistro", "bistrò", "restaurant", "diner", "osteria", "pizzeria", "trattoria", "pizza", "grill", "料理", "午餐", "晚餐", "面包店", "酒吧", "bar"]],
+      ["咖啡", ["咖啡", "cafe", "café", "coffee", "拿铁", "烘焙", "甜品"]],
+      ["餐厅", ["餐厅", "饭店", "食堂", "早餐", "朝ごはん", "橙汁", "果汁", "面包店", "面包", "吐司", "可颂", "法棍", "排骨", "章鱼", "菜包肉", "牛排", "鱼饼", "米饭", "拼盘", "bakery", "bread", "brunch", "bistro", "bistrò", "restaurant", "diner", "osteria", "pizzeria", "trattoria", "pizza", "grill", "料理", "午餐", "晚餐", "酒吧", "bar"]],
       ["酒店", ["酒店", "hotel", "民宿", "住宿", "旅馆", "resort"]],
       ["购物", ["购物", "商场", "百货", "买手店", "古着", "书店", "市集", "market", "boutique", "shop"]],
       ["景点", ["景点", "博物馆", "美术馆", "小巷", "石阶", "公园", "花园", "教堂", "神社", "寺", "宫", "塔", "广场", "museum", "garden"]]
@@ -574,15 +569,17 @@
 
     function cleanPoiName(line) {
       return line
+        .replace(/^(?:\s*(?:[0-9一二三四五六七八九十]+(?:\uFE0F?\u20E3)?|🔟)\s*)+/, "")
         .replace(/^[\s\d一二三四五六七八九十]+[.)、．-]\s*/, "")
         .replace(/^[\s#*•·\-–—|｜>]+/, "")
-        .replace(/^[^0-9A-Za-zÀ-ÿ\u3040-\u30ff\u3400-\u9fff]+/, "")
+        .replace(/^[^0-9A-Za-zÀ-ÿ\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]+/, "")
+        .replace(/[\s⭐★☆✦✧️]+$/g, "")
         .replace(/[：:，,。.!！?？\s]+$/, "")
         .trim();
     }
 
     function startsWithMarker(line) {
-      return /^[^0-9A-Za-zÀ-ÿ\u3040-\u30ff\u3400-\u9fff\s]/.test(line);
+      return /^[^0-9A-Za-zÀ-ÿ\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af\s]/.test(line);
     }
 
     function isNoiseLine(line) {
@@ -590,7 +587,29 @@
       if (!text) return true;
       if (/^\[[#＃].+\]\(https?:\/\/.+\)/.test(text)) return true;
       if (/^(?:[#＃][^\s#＃]+[\s]*)+$/.test(text)) return true;
-      return !/[0-9A-Za-zÀ-ÿ\u3040-\u30ff\u3400-\u9fff]/.test(text);
+      return !/[0-9A-Za-zÀ-ÿ\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/.test(text);
+    }
+
+    function isAddressLine(line) {
+      return /^\s*(?:📍|地址[:：]|位置[:：]|address[:：])/i.test(line.trim());
+    }
+
+    function cleanAddressLine(line) {
+      return line
+        .replace(/^\s*(?:📍|地址[:：]|位置[:：]|address[:：])\s*/i, "")
+        .trim();
+    }
+
+    function parseDetailLine(line) {
+      const text = line.trim();
+      const match = text.match(/^\s*(🏨|🈺|🍽️?|📝)\s*[：:]?\s*(.+)$/);
+      if (!match) return null;
+      const marker = match[1];
+      const content = match[2].trim();
+      return {
+        content,
+        kind: marker === "🏨" ? "area" : "detail"
+      };
     }
 
     function isSectionHeader(line) {
@@ -627,6 +646,23 @@
       };
     }
 
+    function parseInlinePoi(line) {
+      const text = line.trim();
+      const patterns = [
+        /(?:店名|餐厅|咖啡店|咖啡馆|cafe|café|restaurant|bakery|bistro|branch)\s*(?:叫|是|为|:|：)\s*([A-ZÀ-Þ][A-Za-zÀ-ÿ0-9'’&.\-\s]{2,50})(?:[（(]|，|,|。|\.|！|!|；|;|$)/i,
+        /(?:有家|一家|这家|附近有家)\s*(?:view很棒的|海景|宝藏|不错的|很棒的)?\s*(?:cafe|café|咖啡店|咖啡馆|餐厅|面包店|bakery)?\s*[:：]?\s*([A-ZÀ-Þ][A-Za-zÀ-ÿ0-9'’&.\-\s]{2,50})(?:[（(]|，|,|。|\.|！|!|；|;|$)/i
+      ];
+
+      for (const pattern of patterns) {
+        const match = text.match(pattern);
+        if (match && match[1]) {
+          const title = cleanPoiName(match[1]);
+          if (title && title.split(/\s+/).length <= 6) return title;
+        }
+      }
+      return "";
+    }
+
     function looksLikeSentence(line) {
       const text = line.trim();
       if (/[。.!！?？]/.test(text)) return true;
@@ -640,7 +676,7 @@
       if (!inListSection || !startsBlock || !cleaned || cleaned.length > 42) return false;
       if (isSectionHeader(line) || isNoiseLine(line) || looksLikeSentence(cleaned)) return false;
       if (nextLine && isSectionHeader(nextLine)) return false;
-      if (/^[0-9A-Za-zÀ-ÿ\u3040-\u30ff\u3400-\u9fff][0-9A-Za-zÀ-ÿ\u3040-\u30ff\u3400-\u9fff'’&.\-\s（）()・の]+$/.test(cleaned)) return true;
+      if (/^[0-9A-Za-zÀ-ÿ\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af][0-9A-Za-zÀ-ÿ\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af'’&.\-\s（）()・の]+$/.test(cleaned)) return true;
       return false;
     }
 
@@ -648,6 +684,9 @@
       const raw = line.trim();
       const cleaned = cleanPoiName(raw);
       if (!cleaned || cleaned.length > 54) return false;
+      if (isAddressLine(raw)) return false;
+      if (parseDetailLine(raw)) return false;
+      if (/^(?:\s*(?:[0-9一二三四五六七八九十]+(?:\uFE0F?\u20E3)|🔟)\s*)+\S+/.test(raw)) return true;
       if (/^[\d一二三四五六七八九十]+[.)、．-]\s*\S+/.test(raw)) return true;
       if (/^[#*•·\-–—|｜>]/.test(raw)) return true;
       if (startsWithMarker(raw)) {
@@ -676,6 +715,7 @@
             .replace(/附近$/, "")
             .replace(/[，,。.!！?？].*$/, "")
             .trim();
+          if (/^(从|因为|这次|今天|昨天|后来|可以|几乎|所有|主要|点餐|支付|国内|带了|昨天后来)/.test(area)) continue;
           if (area && city && !area.toLowerCase().includes(city.toLowerCase())) return `${area} / ${city}`;
           if (area) return area;
         }
@@ -694,14 +734,6 @@
       if (type === "酒店") return `${compact}，适合作为住宿参考。`;
       if (type === "购物") return `${compact}，适合加入逛街清单。`;
       return `${compact}，值得加入旅行清单。`;
-    }
-
-    function extractClue(text) {
-      const candidates = text
-        .split(/[，,。.!！?？、\n]/)
-        .map((item) => item.trim())
-        .filter((item) => item.length >= 2 && item.length <= 18);
-      return candidates.slice(0, 4).join("、");
     }
 
     function mapUrl(poi) {
@@ -727,6 +759,26 @@
           continue;
         }
 
+        if (isAddressLine(trimmed)) {
+          const address = cleanAddressLine(trimmed);
+          if (current && address) {
+            current.area = current.area || address;
+            current.lines.push(address);
+          }
+          startsBlock = true;
+          continue;
+        }
+
+        const detailLine = parseDetailLine(trimmed);
+        if (detailLine) {
+          if (current && detailLine.content) {
+            if (detailLine.kind === "area") current.area = current.area || detailLine.content;
+            current.lines.push(detailLine.content);
+          }
+          startsBlock = detailLine.kind === "area";
+          continue;
+        }
+
         if (isSectionHeader(trimmed)) {
           if (current) groups.push(current);
           current = null;
@@ -748,6 +800,16 @@
         startsBlock = false;
       }
       if (current) groups.push(current);
+
+      if (!groups.length) {
+        const inlineTitle = parseInlinePoi(text);
+        if (inlineTitle) {
+          groups.push({
+            title: inlineTitle,
+            lines: lines.filter((line) => line && !isNoiseLine(line))
+          });
+        }
+      }
 
       if (!groups.length) {
         const blocks = text
@@ -778,8 +840,7 @@
             name: group.title,
             area: group.area ? (city.trim() ? `${group.area} / ${city.trim()}` : group.area) : detectArea(description, city.trim()),
             type,
-            reason: summarizeReason(group.title, type, description),
-            clue: extractClue(description)
+            reason: summarizeReason(group.title, type, description)
           };
         });
     }
@@ -801,7 +862,6 @@
             </select>
           </td>
           <td data-label="推荐理由"><textarea data-field="reason" aria-label="推荐理由">${escapeHtml(poi.reason)}</textarea></td>
-          <td data-label="原文线索"><textarea data-field="clue" aria-label="原文线索">${escapeHtml(poi.clue)}</textarea></td>
           <td data-label="地图链接"><a class="btn map-link" href="${mapUrl(poi)}" target="_blank" rel="noopener">Google Maps</a></td>
           <td data-label="操作"><button class="btn danger icon" type="button" title="删除" aria-label="删除 POI">×</button></td>
         `;
@@ -863,16 +923,15 @@
         name: "",
         area: city,
         type: "其他",
-        reason: "",
-        clue: ""
+        reason: ""
       });
       render();
       persist();
     }
 
     function downloadCsv() {
-      const headers = ["POI 名称", "城市/区域", "类型", "推荐理由", "原文线索", "Google Maps 链接"];
-      const rows = pois.map((poi) => [poi.name, poi.area, poi.type, poi.reason, poi.clue, mapUrl(poi)]);
+      const headers = ["POI 名称", "城市/区域", "类型", "推荐理由", "Google Maps 链接"];
+      const rows = pois.map((poi) => [poi.name, poi.area, poi.type, poi.reason, mapUrl(poi)]);
       const csv = [headers, ...rows].map((row) => row.map(csvCell).join(",")).join("\n");
       const blob = new Blob([`\ufeff${csv}`], { type: "text/csv;charset=utf-8" });
       const url = URL.createObjectURL(blob);
