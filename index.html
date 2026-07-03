@@ -899,38 +899,57 @@
       display: flex;
       justify-content: flex-end;
       align-items: center;
-      gap: 10px;
-      margin-top: 18px;
+      gap: 12px;
+      margin-top: 24px;
       color: var(--accent);
-      font-family: "Bradley Hand", "Comic Sans MS", "Segoe Print", cursive;
-      font-size: 20px;
-      transform: rotate(-1deg);
+      font-family: "Bradley Hand", "Marker Felt", "Segoe Print", "Comic Sans MS", cursive;
+      font-size: clamp(22px, 2vw, 30px);
+      font-weight: 500;
+      letter-spacing: 0.01em;
+      line-height: 1.1;
+      transform: rotate(-1.4deg);
+      text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
+    }
+
+    .made-with .love-word {
+      color: #b45b54;
+      font-weight: 600;
+    }
+
+    .made-text {
+      display: inline-block;
     }
 
     .flight-mark {
       position: relative;
       display: inline-block;
-      width: 86px;
-      height: 28px;
+      width: 112px;
+      height: 36px;
+      flex: 0 0 auto;
     }
 
     .flight-mark::before {
       content: "";
       position: absolute;
-      inset: 10px 16px 0 0;
-      border-top: 2px dashed rgba(49, 95, 82, 0.45);
-      border-radius: 50%;
-      transform: rotate(-9deg);
+      left: 0;
+      right: 22px;
+      top: 15px;
+      height: 18px;
+      border-top: 2px dashed rgba(49, 95, 82, 0.4);
+      border-radius: 60% 45% 0 0;
+      transform: rotate(-7deg);
     }
 
     .flight-mark::after {
-      content: "✈";
+      content: "✈︎";
       position: absolute;
       right: 0;
-      top: 0;
+      top: -1px;
       color: var(--accent);
-      font-size: 24px;
-      transform: rotate(-15deg);
+      font-size: 28px;
+      line-height: 1;
+      transform: rotate(-16deg);
+      text-shadow: 0 2px 8px rgba(49, 95, 82, 0.16);
     }
 
     .hidden {
@@ -1337,15 +1356,26 @@
 
       .made-with {
         justify-content: center;
-        margin-top: 24px;
-        color: #8f9694;
-        font-family: inherit;
-        font-size: 14px;
-        transform: none;
+        margin-top: 22px;
+        color: var(--accent);
+        font-size: 20px;
+        transform: rotate(-1deg);
       }
 
       .flight-mark {
-        display: none;
+        width: 76px;
+        height: 26px;
+      }
+
+      .flight-mark::before {
+        right: 18px;
+        top: 12px;
+        height: 12px;
+        border-top-width: 1.5px;
+      }
+
+      .flight-mark::after {
+        font-size: 21px;
       }
     }
 
@@ -1575,9 +1605,17 @@
         display: block;
       }
 
-      .hero-note,
-      .made-with {
+      .hero-note {
         display: none;
+      }
+
+      .made-with {
+        margin-top: 18px;
+        font-size: 18px;
+      }
+
+      .flight-mark {
+        width: 58px;
       }
 
       .status {
@@ -1901,7 +1939,7 @@
           <p class="empty-title">粘贴一篇旅行攻略开始。</p>
           <p class="empty-copy">我们会帮你提取咖啡店、餐厅、商店、景点和酒店。</p>
         </div>
-        <div class="made-with">Made with love for travelers.<span class="flight-mark" aria-hidden="true"></span></div>
+        <div class="made-with"><span class="made-text">Made with <span class="love-word">love</span> for travelers.</span><span class="flight-mark" aria-hidden="true"></span></div>
       </div>
     </section>
   </main>
@@ -1911,7 +1949,7 @@
     const TYPES = ["咖啡", "餐厅", "景点", "酒店", "购物", "其他"];
     const TYPE_KEYWORDS = [
       ["咖啡", ["咖啡", "珈琲", "☕", "cafe", "café", "coffee", "拿铁", "烘焙", "甜品"]],
-      ["餐厅", ["餐厅", "饭店", "食堂", "小馆", "麦当劳", "早餐", "朝ごはん", "橙汁", "果汁", "面包店", "面包", "吐司", "可颂", "法棍", "🥯", "🥖", "🍞", "🥐", "🌭", "排骨", "章鱼", "菜包肉", "牛排", "鱼饼", "米饭", "拼盘", "吃饭", "用餐", "bakery", "bread", "brunch", "bistro", "bistrò", "restaurant", "diner", "osteria", "pizzeria", "trattoria", "pizza", "grill", "料理", "午餐", "晚餐", "酒吧", "bar"]],
+      ["餐厅", ["餐厅", "饭店", "食堂", "小馆", "麦当劳", "早餐", "朝ごはん", "橙汁", "果汁", "面包店", "面包", "吐司", "可颂", "法棍", "🥯", "🥖", "🍞", "🥐", "🌭", "排骨", "章鱼", "菜包肉", "牛排", "鱼饼", "米饭", "拼盘", "吃饭", "用餐", "意大利菜", "泰国菜", "法国菜", "白人饭", "招牌菜", "omakase", "寿司", "sushi", "烤肉", "焼肉", "ヤキニク", "拉面", "拉麵", "ラーメン", "bakery", "bread", "brunch", "bistro", "bistrò", "restaurant", "diner", "osteria", "pizzeria", "trattoria", "pizza", "grill", "料理", "午餐", "晚餐", "酒吧", "bar"]],
       ["酒店", ["酒店", "hotel", "民宿", "住宿", "旅馆", "resort"]],
       ["购物", ["购物", "商场", "百货", "买手店", "古着", "书店", "市集", "伴手礼", "纪念品", "九谷烧", "器物", "清酒杯", "茶杯", "花瓶", "工厂店", "百丽宫", "丹寧", "牛仔", "牛仔褲", "Jeans Street", "ABC Store", "montbell", "market", "boutique", "shop"]],
       ["景点", ["景点", "博物馆", "美术馆", "小巷", "石阶", "公园", "花园", "教堂", "神社", "寺", "城", "岛", "島", "海", "海岸", "大桥", "站前", "浜", "宮", "宫", "塔", "广场", "廣場", "温泉", "金门大桥", "Lover's Point", "Las Vegas Strip", "Sphere Vista Point", "威尼斯人", "museum", "garden"]]
@@ -1978,6 +2016,16 @@
       return line
         .replace(/^\s*(?:📍|地址[:：]|位置[:：]|address[:：])\s*/i, "")
         .trim();
+    }
+
+    function splitTrailingAreaFromTitle(value) {
+      const text = cleanPoiName(value || "");
+      const match = text.match(/^(.{2,80}?)[\s,，]+((?:\d{5})(?:\s*(?:\/|-)\s*\d{5})?)$/);
+      if (!match) return { title: text, area: "" };
+      const title = cleanPoiName(match[1]);
+      const area = match[2].replace(/\s+/g, " ").trim();
+      if (!title || looksLikeSentence(title)) return { title: text, area: "" };
+      return { title, area };
     }
 
     function parseDetailLine(line) {
@@ -2148,7 +2196,7 @@
       if (/^\d{2,}\s+[A-ZÀ-Þ]/.test(String(title || "").trim())) {
         return String(title || "").trim();
       }
-      const cleaned = cleanPoiName(title);
+      const cleaned = splitTrailingAreaFromTitle(title).title;
       if (/站前$/.test(cleaned)) return cleaned;
       return cleaned
         .replace(/^(JR\s*[^站]{1,12}站).*$/i, "$1")
@@ -2592,6 +2640,7 @@
       if (/^(?:kitahama blue stories|element)/i.test(text)) return "购物";
       if (/^Jeans Street/i.test(text)) return "购物";
       if (/^.{0,30}(珈琲|咖啡|cafe|café|coffee)/i.test(text)) return "咖啡";
+      if (/(博物馆|美术馆|museum)/i.test(text)) return "景点";
       if (/(面包店|面包|吐司|可颂|法棍|🥯|🥖|🍞|🥐|bakery|bread)/i.test(lower)) return "餐厅";
       for (const [type, words] of TYPE_KEYWORDS) {
         if (words.some((word) => lower.includes(word.toLowerCase()))) return type;
@@ -2732,7 +2781,7 @@
         }
       }
 
-      appendTravelMentions(groups, text, city);
+      if (groups.length < 3) appendTravelMentions(groups, text, city);
 
       if (!groups.length) {
         groups.push(...parseEmbeddedPois(text, city));
@@ -2764,15 +2813,20 @@
         .map((group) => ({ ...group, suspicious: group.suspicious || isSuspiciousPoiCandidate(group) }))
         .filter((group) => group.title && !group.suspicious)
         .map((group) => {
+          const trailingArea = splitTrailingAreaFromTitle(group.rawLine || group.title);
+          const titleArea = splitTrailingAreaFromTitle(group.title);
+          const name = trailingArea.area ? trailingArea.title : titleArea.title;
+          const inlineArea = trailingArea.area || titleArea.area;
           const description = group.lines.join("。");
-          const fullText = `${group.title} ${description}`;
+          const fullText = `${name} ${description}`;
           const type = classifyType(fullText);
+          const area = group.area || inlineArea;
           return {
             id: uid(),
-            name: group.title,
-            area: group.area ? (city.trim() && group.area.toLowerCase() !== city.trim().toLowerCase() ? `${group.area} / ${city.trim()}` : group.area) : detectArea(description, city.trim()),
+            name,
+            area: area ? (city.trim() && area.toLowerCase() !== city.trim().toLowerCase() ? `${area} / ${city.trim()}` : area) : detectArea(description, city.trim()),
             type,
-            reason: summarizeReason(group.title, type, description),
+            reason: summarizeReason(name, type, description),
             clue: summarizeClue(description)
           };
         });
