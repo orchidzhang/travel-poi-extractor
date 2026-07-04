@@ -2423,6 +2423,75 @@
       return groups;
     }
 
+    function normalizePageReferencePoiTitle(title) {
+      let text = cleanPoiName(String(title || ""))
+        .replace(/^(?:有|在|去|到|吃|逛|推荐|不推荐|强烈推荐|热门|网红|老牌子|地理位置方便|只做午市|一出高松站的)\s*/, "")
+        .replace(/^(?:的|这家|那家|一家|店名|店叫)\s*/, "")
+        .replace(/\s+/g, " ")
+        .trim();
+
+      if (text.includes("的")) {
+        const parts = text.split("的").map((part) => part.trim()).filter(Boolean);
+        const last = parts[parts.length - 1] || "";
+        if (last.length >= 2 && last.length <= 16) text = last;
+      }
+
+      text = text
+        .replace(/^(?:的|这家|那家|一家)\s*/, "")
+        .replace(/(?:也?是|据说|强烈推荐|不推荐|一般|很地道|便宜量大).*$/, "")
+        .replace(/也$/, "")
+        .replace(/[：:，,。.!！?？、\s]+$/, "")
+        .trim();
+
+      if (!text || text.length < 2 || text.length > 18) return "";
+      if (/^(?:P\d+|P\d+和|乌冬|手打乌冬|寿喜烧|越南河粉|炸猪排|豆奶野菜锅|饭和面套餐|牛肉|橄榄牛|法棍|车站这家乌冬|高松站|商业街)$/.test(text)) return "";
+      if (/^(?:也许|越南河粉)/.test(text)) return "";
+      if (/(?:第一顿)?乌冬$/.test(text)) return "";
+      if (/^(?:有|只做|地理位置|热门|网红|评价|特别|晚上|不是|时间|大概|队伍|口味|可能|接下来|谷歌|店里|这些|商业街)/.test(text)) return "";
+      if (/(?:排队|营业|口味|时间|工作日|推荐|不作推荐|一般|浓郁|正宗|清淡|爽口|不用|什么也没吃出来|心情好好)/.test(text)) return "";
+      return text;
+    }
+
+    function appendPageReferencePois(groups, text, city) {
+      const seen = new Set(groups.map((group) => normalizePageReferencePoiTitle(group.title).toLowerCase()).filter(Boolean));
+      const lines = text
+        .replace(/\[[#＃][^\]]+\]\(https?:\/\/[^\)]+\)/g, "")
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean);
+
+      function add(title, detail) {
+        const cleaned = normalizePageReferencePoiTitle(title);
+        const key = cleaned.toLowerCase();
+        if (!cleaned || seen.has(key)) return;
+        seen.add(key);
+        groups.push({
+          title: cleaned,
+          area: city.trim(),
+          lines: [detail].filter(Boolean),
+          rawLine: detail || title
+        });
+      }
+
+      for (const line of lines) {
+        if (!/P\d+/i.test(line)) continue;
+
+        let match = line.match(/(?:^|[，,。.!！?？\s])([^，,。.!！?？]{2,24}?)\s*P\d+(?:\s*[-—~至到和、]\s*P?\d+)?/i);
+        if (match) add(match[1], line);
+
+        match = line.match(/P\d+(?:\s*[-—~至到和、]\s*P?\d+)?\s*的\s*([^，,。.!！?？]{2,18})/i);
+        if (match) add(match[1], line);
+
+        const namedMatches = line.matchAll(/([\u3400-\u9fffA-Za-zÀ-ÿ0-9'’&.\-\s]{2,18}(?:食堂|拉面|餐厅|飯店|饭店|小馆|料理|酒场|酒場|咖啡|珈琲|cafe|café|coffee))(?=[，,。.!！?？\s]|——|--|$)/gi);
+        for (const namedMatch of namedMatches) add(namedMatch[1], line);
+
+        match = line.match(/[，,。]\s*([\u3400-\u9fffA-Za-zÀ-ÿ0-9'’&.\-\s]{2,12})(?:也?是|不推荐|推荐|强烈推荐|很地道|便宜量大)/);
+        if (match) add(match[1], line);
+      }
+
+      return groups;
+    }
+
     function parseEmbeddedPois(text, city) {
       const normalized = text
         .replace(/\[[#＃][^\]]+\]\(https?:\/\/[^\)]+\)/g, "")
@@ -2813,6 +2882,7 @@
       }
 
       if (groups.length < 3) appendTravelMentions(groups, text, city);
+      if (groups.length < 3) appendPageReferencePois(groups, text, city);
 
       if (!groups.length) {
         groups.push(...parseEmbeddedPois(text, city));
