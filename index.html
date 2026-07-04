@@ -2123,6 +2123,7 @@
         .replace(/^\s*[\d一二三四五六七八九十]+[.)、．-]\s*/, "")
         .replace(/^\s*[#*•·\-–—|｜>]+\s*/, "")
         .replace(/^\s*[^\dA-Za-zÀ-ÿ\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af\s]+\s*/, "")
+        .replace(/^[\s\u2060]+/, "")
         .trim();
     }
 
@@ -2168,6 +2169,11 @@
 
     function titleFromPoiLine(line) {
       const raw = String(line || "").trim();
+      const markerless = stripLineMarker(raw);
+      const prefixParenMatch = markerless.match(/^([^（(：:，,。.!！?？]{2,60})[（(]/);
+      if (prefixParenMatch && !/^(?:上午|中午|下午|晚上|早上|傍晚|夜晚)$/.test(prefixParenMatch[1].trim())) {
+        return cleanPoiName(prefixParenMatch[1]);
+      }
       const markerHeadingMatch = raw.match(/^(?:\s*(?:[0-9一二三四五六七八九十]+(?:\uFE0F?\u20E3)?|🔟)|\d+[.)、．-]|[^0-9A-Za-zÀ-ÿ\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af\s]).*?[（(]([^）)]{2,42})[）)]/);
       if (markerHeadingMatch) return cleanPoiName(markerHeadingMatch[1]);
       if (/^(?:\s*(?:[0-9一二三四五六七八九十]+(?:\uFE0F?\u20E3)?|🔟)|\d+[.)、．-]|[^0-9A-Za-zÀ-ÿ\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af\s])/.test(raw) && /[：:]/.test(raw)) {
@@ -2208,6 +2214,8 @@
       }
       const cleaned = splitTrailingAreaFromTitle(title).title;
       if (/站前$/.test(cleaned)) return cleaned;
+      if (cleaned === "大洲博物馆") return "五大洲博物馆";
+      if (cleaned === "老绘画馆馆") return "老绘画馆";
       return cleaned
         .replace(/^(JR\s*[^站]{1,12}站).*$/i, "$1")
         .replace(/^([^站\s]{2,8}站).+$/i, "$1")
@@ -2545,6 +2553,153 @@
       return groups;
     }
 
+    function normalizeGuideMentionTitle(title) {
+      let text = String(title || "")
+        .replace(/^\[[一二三四五六七八九十\d]+R\]\s*/, "")
+        .replace(/^\s*[⭐★☆✦✧]\s*/, "")
+        .replace(/^\s*[#*•·\-–—|｜>]+\s*/, "")
+        .replace(/^[^0-9A-Za-zÀ-ÿ\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]+/, "")
+        .replace(/[：:，,。.!！?？\s]+$/, "")
+        .replace(/^[\s⭐★☆✦✧]+/, "")
+        .replace(/^(?:市中心的|旁边的|旁边|连同|顺路逛一下|至于周边|其他景点里面|可以考虑|优先级可以放在|真正比较特别的是)\s*/, "")
+        .replace(/^(?:Füssen|Fussen)\s*/i, "")
+        .replace(/馆馆/g, "馆")
+        .replace(/\s+/g, " ")
+        .trim();
+
+      if (text.includes("和")) {
+        const parts = text.split("和").map((part) => part.trim()).filter(Boolean);
+        const last = parts[parts.length - 1] || "";
+        if (last.length >= 2 && last.length <= 18) text = last;
+      }
+
+      text = text
+        .replace(/(?:一起看|一起安排|会比较完整|也去了|都属于|属于|是|欧洲最大|德国境内|世界第一梯队|汽车爱好者|目前|可以|就).*$/, "")
+        .replace(/等$/, "")
+        .replace(/都$/, "")
+        .replace(/[：:，,。.!！?？、\s]+$/, "")
+        .trim();
+
+      if (!text || text.length < 2 || text.length > 24) return "";
+      if (/^(?:德国|欧洲|慕尼黑|博物馆|教堂方面|其他景点|市中心|周边|单程交通|世界第一梯队的科技博物馆|英国花园欧洲最大的城市公园)$/.test(text)) return "";
+      if (/^(?:从慕尼黑出发|慕尼黑整体水平|但风格)/.test(text)) return "";
+      if (/^(?:很多|如果|整体|这里|属于|门票|参观|建筑|空间|内容|后者|位置|水质|峡湾感)/.test(text)) return "";
+      if (/(?:时间|门票|风格|生活展示|观赏性|文化象征|比较完整|未来感|交通|景观|体系|收藏|作品|肖像)$/.test(text)) return "";
+      return text;
+    }
+
+    function appendGuideMentionPois(groups, text, city) {
+      if (!/^\[[一二三四五六七八九十\d]+R\]/m.test(text)) return groups;
+      const seen = new Set(groups.map((group) => normalizeGuideMentionTitle(group.title).toLowerCase()).filter(Boolean));
+      const lines = text
+        .replace(/\[[#＃][^\]]+\]\(https?:\/\/[^\)]+\)/g, "")
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean);
+
+      function add(title, detail) {
+        const cleaned = normalizeGuideMentionTitle(title);
+        const key = cleaned.toLowerCase();
+        if (!cleaned || seen.has(key)) return;
+        seen.add(key);
+        groups.push({
+          title: cleaned,
+          area: city.trim(),
+          lines: [detail].filter(Boolean),
+          rawLine: detail || title
+        });
+      }
+
+      function addList(value, detail) {
+        String(value || "")
+          .split(/[、，,和]/)
+          .map((item) => item.trim())
+          .filter(Boolean)
+          .forEach((item) => add(item, detail));
+      }
+
+      for (const line of lines) {
+        let match = line.match(/^\[[一二三四五六七八九十\d]+R\]\s*([^：:，,。.!！?？]{2,80})[：:，,。]/);
+        if (match) addList(match[1], line);
+
+        const sideMatches = line.matchAll(/(?:连同|旁边的|顺路逛一下)([^，,。.!！?？]{2,36}?)(?:一起看|会比较完整|一起安排|，|,|。|$)/g);
+        for (const sideMatch of sideMatches) addList(sideMatch[1], line);
+
+        match = line.match(/(?:圣母教堂、圣彼得教堂、圣弥额尔教堂和特阿提纳教堂)/);
+        if (match) addList(match[0], line);
+
+        match = line.match(/(?:特别的是|比较特别的是)([^，,。.!！?？]{2,18})/);
+        if (match) add(match[1], line);
+
+        match = line.match(/比如([^。.!！?？]{2,60})(?:等|。|$)/);
+        if (match) addList(match[1], line);
+
+        match = line.match(/^[⭐★☆✦✧]\s*([^：:，,。.!！?？]{2,24})[：:，,。]/);
+        if (match) add(match[1], line);
+
+        match = line.match(/(?:可以考虑|放在)([^，,。.!！?？]{2,18})(?:，|,|。|$)/);
+        if (match) add(match[1], line);
+
+        match = line.match(/([^，,。.!！?？]{2,18})欧洲最大的城市公园/);
+        if (match) add(match[1], line);
+      }
+
+      return groups;
+    }
+
+    function normalizeDailyListTitle(line) {
+      let text = stripLineMarker(String(line || ""))
+        .replace(/^[\s\u2060]+/, "")
+        .replace(/[（(].*?[）)]/g, "")
+        .replace(/\*.+$/, "")
+        .replace(/\s+/g, " ")
+        .trim();
+
+      if (!text || /^[第]?[一二三四五六七八九十\d]+天\s*[：:]/.test(text)) return "";
+
+      const latinMatch = text.match(/^([A-ZÀ-Þ][A-Za-zÀ-ÿ0-9'’&.\-\s]+?)(?:\s+[\u3400-\u9fff]|[，,。.!！?？]|$)/);
+      if (latinMatch) text = latinMatch[1].trim();
+
+      text = cleanPoiName(text)
+        .replace(/^(?:Restaurant\s+)(?=Augustiner)/i, "Restaurant ")
+        .replace(/[：:，,。.!！?？\s]+$/, "")
+        .trim();
+
+      if (!text || text.length < 2 || text.length > 42) return "";
+      if (/^(?:可以步行上山|我们在慕尼黑只有两天|第一天|第二天|第三天)$/.test(text)) return "";
+      if (/(?:门票|免费观光|星期|当地市集|木偶表演|摸她|蜂蜜口味|德国甜甜圈|一个公园|很多本地人|河边冲浪|连锁店|马车|早餐)/.test(text)) return "";
+      return text;
+    }
+
+    function appendDailyListPois(groups, text, city) {
+      if (!/^\s*第?[一二三四五六七八九十\d]+天\s*[：:]/m.test(text)) return groups;
+      const seen = new Set(groups.map((group) => normalizeDailyListTitle(group.title).toLowerCase()).filter(Boolean));
+      const lines = text
+        .replace(/\[[#＃][^\]]+\]\(https?:\/\/[^\)]+\)/g, "")
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean);
+
+      function add(line) {
+        const cleaned = normalizeDailyListTitle(line);
+        const key = cleaned.toLowerCase();
+        if (!cleaned || seen.has(key)) return;
+        seen.add(key);
+        groups.push({
+          title: cleaned,
+          area: city.trim(),
+          lines: [line],
+          rawLine: line
+        });
+      }
+
+      for (const line of lines) {
+        if (/^\s*(?:[-–—•]|[^\dA-Za-zÀ-ÿ\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af\s])/.test(line)) add(line);
+      }
+
+      return groups;
+    }
+
     function parseEmbeddedPois(text, city) {
       const normalized = text
         .replace(/\[[#＃][^\]]+\]\(https?:\/\/[^\)]+\)/g, "")
@@ -2764,6 +2919,7 @@
       const raw = line.trim();
       const cleaned = cleanPoiName(raw);
       if (!cleaned || cleaned.length > 54) return false;
+      if (/^\[[一二三四五六七八九十\d]+R\]/.test(raw)) return false;
       if (isDayHeader(raw)) return false;
       if (isAddressLine(raw)) return false;
       if (parseDetailLine(raw)) return false;
@@ -2925,6 +3081,8 @@
       if (current) groups.push(current);
       appendInlinePois(groups, text, city);
       appendRouteStopPois(groups, text, city);
+      appendGuideMentionPois(groups, text, city);
+      appendDailyListPois(groups, text, city);
 
       if (!groups.length) {
         const inlineTitle = parseInlinePoi(text);
@@ -2971,7 +3129,9 @@
         .map((group) => {
           const trailingArea = splitTrailingAreaFromTitle(group.rawLine || group.title);
           const titleArea = splitTrailingAreaFromTitle(group.title);
-          const name = trailingArea.area ? trailingArea.title : titleArea.title;
+          let name = trailingArea.area ? trailingArea.title : titleArea.title;
+          if (name === "大洲博物馆") name = "五大洲博物馆";
+          if (name === "老绘画馆馆") name = "老绘画馆";
           const inlineArea = trailingArea.area || titleArea.area;
           const description = group.lines.join("。");
           const fullText = `${name} ${description}`;
