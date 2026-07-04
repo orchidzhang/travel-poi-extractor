@@ -2160,6 +2160,7 @@
       const description = (group?.lines || []).join("。");
       if (!title) return true;
       if (title.length > 42 || looksLikeSentence(title)) return true;
+      if (/(?:行程是|路线|打卡照相|谷歌地图)/.test(title)) return true;
       if (/(?:不用|可以|建议|提前|特别|很多|随便|直接|完全|真的|感觉|时候|这里|里面|路线|记录一下)/.test(title)) return true;
       const score = scorePoiCandidate(title, group.rawLine || title, description || "", true);
       return score < 3;
@@ -2492,6 +2493,58 @@
       return groups;
     }
 
+    function normalizeRouteStopTitle(title) {
+      const text = cleanPoiName(String(title || ""))
+        .replace(/[（(].*?[）)]/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+      if (!text || text.length < 2 || text.length > 42) return "";
+      if (/^(?:第一天|第二天|行程|路线|如下|所有大的景点)$/.test(text)) return "";
+      if (/(?:行程|路线|打卡|照相|谷歌地图|很多时间|走走停停|拍照)/.test(text)) return "";
+      return text;
+    }
+
+    function appendRouteStopPois(groups, text, city) {
+      const seen = new Set(groups.map((group) => normalizeRouteStopTitle(group.title).toLowerCase()).filter(Boolean));
+      const lines = text
+        .replace(/\[[#＃][^\]]+\]\(https?:\/\/[^\)]+\)/g, "")
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean);
+
+      function add(title, detail) {
+        const cleaned = normalizeRouteStopTitle(title);
+        const key = cleaned.toLowerCase();
+        if (!cleaned || seen.has(key)) return;
+        seen.add(key);
+        groups.push({
+          title: cleaned,
+          area: city.trim(),
+          lines: [detail].filter(Boolean),
+          rawLine: detail || title
+        });
+      }
+
+      for (const line of lines) {
+        let match = line.match(/^第[一二三四五六七八九十\d]+站[：:]\s*([^（(]{2,60})(?:[（(]([^）)]{2,60})[）)])?/);
+        if (match) {
+          add(match[1], match[2] ? `${match[1]}（${match[2]}）` : line);
+          continue;
+        }
+
+        match = line.match(/tour去看([^，,。.!！?？]{2,18})/i);
+        if (match) add(match[1], line);
+
+        match = line.match(/\b(Linderhof)\b/i);
+        if (match) add(match[1], line);
+
+        match = line.match(/(?:和|、)(壁画村)(?:也去了|去了|，|,|。|$)/);
+        if (match) add(match[1], line);
+      }
+
+      return groups;
+    }
+
     function parseEmbeddedPois(text, city) {
       const normalized = text
         .replace(/\[[#＃][^\]]+\]\(https?:\/\/[^\)]+\)/g, "")
@@ -2691,6 +2744,7 @@
 
     function looksLikeSentence(line) {
       const text = line.trim();
+      if (/^[A-ZÀ-Þ][A-Za-zÀ-ÿ0-9'’&.\-\s]{2,42}$/.test(text) && text.split(/\s+/).length <= 6) return false;
       if (/[。.!！?？]/.test(text)) return true;
       if (text.length > 24 && /[的了在是有和与就都也很超多不用可以看到随处最近由于去年那天]/.test(text)) return true;
       if (/^(这座|周末|日剧|列车|火车|不用|雨季|尾道有意思)/.test(text)) return true;
@@ -2870,6 +2924,7 @@
       }
       if (current) groups.push(current);
       appendInlinePois(groups, text, city);
+      appendRouteStopPois(groups, text, city);
 
       if (!groups.length) {
         const inlineTitle = parseInlinePoi(text);
