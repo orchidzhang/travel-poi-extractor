@@ -2018,8 +2018,17 @@
       return !/[0-9A-Za-zÀ-ÿ\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/.test(text);
     }
 
+    function isPinnedPoiTitle(line) {
+      const raw = String(line || "").trim();
+      if (!/^📍\s*/.test(raw)) return false;
+      const title = cleanPoiName(raw);
+      return Boolean(title && title.length <= 42 && hasPlaceNameShape(title) && !looksLikeSentence(title));
+    }
+
     function isAddressLine(line) {
-      return /^\s*(?:📍|地址[:：]|位置[:：]|address[:：])/i.test(line.trim());
+      const raw = line.trim();
+      if (/^📍\s*/.test(raw)) return !isPinnedPoiTitle(raw);
+      return /^(?:地址[:：]|位置[:：]|address[:：])/i.test(raw);
     }
 
     function cleanAddressLine(line) {
